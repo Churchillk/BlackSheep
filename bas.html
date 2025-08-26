@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        
+        function Person(first, last, nationality, tribe)
+        {
+            this.firstname = first
+            this.lastname = last
+            this.nationality = nationality
+            this.tribez = tribe
+            this.changeFname = function (name){this.firstname = name;}
+        }
+        <!-- Person.prototype.tribe = "Luo"; -->
+        let p1 = new Person("Odhiambo", "Churchill", "Kenya", "Luo")
+        console.log(p1.firstname)
+        p1.changeFname("Kennedy")
+        console.log(p1.firstname)
+    </script>
+</body>
+</html>

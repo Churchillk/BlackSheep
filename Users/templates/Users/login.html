@@ -1,0 +1,25 @@
+{% extends "Home/base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form">
+        <h2>Cyber<span class="glow-text">Admin</span></h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="loginEmail">Username</label>
+                <input type="text" id="loginEmail" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+            <div class="auth-switch">
+                Don't have an account? <a href="{% url 'register' %}">Register</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

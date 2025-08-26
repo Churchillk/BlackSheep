@@ -1,0 +1,139 @@
+{% extends "Home/base.html" %}
+
+{% block title %}Decoder Tool{% endblock %}
+{% block page_title %}Decoder Tool{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <h2>Enter Encoded Value</h2>
+            <p>Decode various encoding formats with our premium tool</p>
+        </div>
+        
+        <form method="post" class="premium-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.encoded_value.id_for_label }}" class="form-label">
+                    <i class="fas fa-pencil-alt"></i> Encoded Value
+                </label>
+                {{ form.encoded_value }}
+                {% if form.encoded_value.errors %}
+                <div class="form-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.encoded_value.errors }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.encoding_type.id_for_label }}" class="form-label">
+                    <i class="fas fa-cog"></i> Encoding Type
+                </label>
+                <div class="select-wrapper">
+                    {{ form.encoding_type }}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                {% if form.encoding_type.errors %}
+                <div class="form-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.encoding_type.errors }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn-primary btn-full-width">
+                <i class="fas fa-unlock"></i> Decode Value
+            </button>
+        </form>
+        
+        {% if decoded_value %}
+        <div class="result-container">
+            <div class="result-header">
+                <h3>Decoded Result</h3>
+                <span class="encoding-badge">{{ encoding_type }}</span>
+            </div>
+            <div class="result-content">
+                <pre>{{ decoded_value }}</pre>
+                <button class="btn-secondary btn-copy" data-clipboard-text="{{ decoded_value }}">
+                    <i class="fas fa-copy"></i> Copy to Clipboard
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="form-help">
+        <h3><i class="fas fa-info-circle"></i> Supported Encoding Types</h3>
+        <div class="help-grid">
+            <div class="help-item">
+                <div class="help-icon base64">
+                    <i class="fas fa-font"></i>
+                </div>
+                <h4>Base64</h4>
+                <p>Decode Base64 encoded strings</p>
+            </div>
+            <div class="help-item">
+                <div class="help-icon url">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h4>URL Encoding</h4>
+                <p>Decode URL percent-encoded strings</p>
+            </div>
+            <div class="help-item">
+                <div class="help-icon html">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h4>HTML Entities</h4>
+                <p>Decode HTML character entities</p>
+            </div>
+            <div class="help-item">
+                <div class="help-icon hex">
+                    <i class="fas fa-hashtag"></i>
+                </div>
+                <h4>Hexadecimal</h4>
+                <p>Convert hex values to readable text</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize clipboard.js
+    new ClipboardJS('.btn-copy');
+    
+    // Add copy confirmation
+    const copyButtons = document.querySelectorAll('.btn-copy');
+    copyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 2000);
+        });
+    });
+    
+    // Add focus effects to form fields
+    const formInputs = document.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+});
+</script>
+{% endblock %}
