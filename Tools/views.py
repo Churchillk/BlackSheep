@@ -181,3 +181,130 @@ class EncodeInput(FormView):
             return encoded
         except Exception:
             return None
+        
+# -------------------------------------------
+#              REQUESTS SITE                #
+# -------------------------------------------
+import requests
+import json
+from django.shortcuts import render
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+from django.shortcuts import render
+from django.views import View
+import requests
+import json
+
+class RequestMakerView(View):
+    def get(self, request):
+        return render(request, 'Requests/request_maker.html')
+    
+    def post(self, request):
+        url = request.POST.get('url', '')
+        method = request.POST.get('method', 'GET')
+        timeout = int(request.POST.get('timeout', 10))
+        data = request.POST.get('data', '')
+        
+        # Prepare headers
+        headers = {}
+        header_names = request.POST.getlist('header_name[]')
+        header_values = request.POST.getlist('header_value[]')
+        for i in range(len(header_names)):
+            if header_names[i] and header_values[i]:
+                headers[header_names[i]] = header_values[i]
+        
+        # ✅ Add default User-Agent if not provided
+        if "User-Agent" not in headers:
+            headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+        
+        # Prepare cookies
+        cookies = {}
+        cookie_names = request.POST.getlist('cookie_name[]')
+        cookie_values = request.POST.getlist('cookie_value[]')
+        for i in range(len(cookie_names)):
+            if cookie_names[i] and cookie_values[i]:
+                cookies[cookie_names[i]] = cookie_values[i]
+        
+        # Prepare request data
+        request_data = None
+        if data and method in ['POST', 'PUT', 'PATCH']:
+            try:
+                # Try to parse as JSON
+                request_data = json.loads(data)
+                headers['Content-Type'] = headers.get('Content-Type', 'application/json')
+            except json.JSONDecodeError:
+                # If not JSON, use as form data
+                request_data = data
+                if 'Content-Type' not in headers:
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        
+        try:
+            # Make the request
+            response = requests.request(
+                method=method,
+                url=url,
+                headers=headers,
+                cookies=cookies,
+                json=request_data if isinstance(request_data, dict) else None,
+                data=request_data if not isinstance(request_data, dict) else None,
+                timeout=timeout,
+                allow_redirects=True
+            )
+            
+            # Get the response content
+            content = response.text
+            
+            # Rewrite relative URLs to absolute URLs for HTML content
+            if url.startswith('http') and 'text/html' in response.headers.get('Content-Type', ''):
+                from urllib.parse import urlparse
+                parsed_url = urlparse(url)
+                base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
+                
+                # Replace relative URLs with absolute URLs
+                content = content.replace('src="/', f'src="{base_domain}/')
+                content = content.replace('href="/', f'href="{base_domain}/')
+                content = content.replace('url("/', f'url("{base_domain}/')
+                content = content.replace("url('/", f"url('{base_domain}/")
+                content = content.replace('url("/', f'url("{base_domain}/')
+            
+            # Prepare pretty content (try to parse as JSON first)
+            try:
+                pretty_content = json.dumps(response.json(), indent=2)
+            except:
+                pretty_content = content  # Use the modified content
+            
+            # Determine status category for styling
+            status_category = 'other'
+            if 200 <= response.status_code < 300:
+                status_category = '2xx'
+            elif 300 <= response.status_code < 400:
+                status_category = '3xx'
+            elif 400 <= response.status_code < 500:
+                status_category = '4xx'
+            elif 500 <= response.status_code < 600:
+                status_category = '5xx'
+            
+            response_data = {
+                'status_code': response.status_code,
+                'reason': response.reason,
+                'headers': dict(response.headers),
+                'cookies': dict(response.cookies),
+                'content': content,  # Use the modified content
+                'pretty_content': pretty_content,
+                'elapsed': int(response.elapsed.total_seconds() * 1000),
+                'status_category': status_category
+            }
+            
+            return render(request, 'Requests/request_maker.html', {
+                'response_data': response_data,
+                'cookies': [{'name': k, 'value': v} for k, v in cookies.items()]
+            })
+            
+        except requests.exceptions.RequestException as e:
+            return render(request, 'Requests/request_maker.html', {
+                'error': str(e),
+                'cookies': [{'name': k, 'value': v} for k, v in cookies.items()]
+            })

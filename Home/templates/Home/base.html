@@ -65,6 +65,29 @@
                                 </a>
                             </div>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">
+                                <div class="nav-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <span class="nav-text">Request Tools</span>
+                                <i class="dropdown-icon fas fa-chevron-down"></i>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a href="{% url 'request_maker' %}" class="dropdown-item">
+                                    <i class="fas fa-cookie"></i>
+                                    <span>Send Cookies</span>
+                                </a>
+                                <a href="{% url 'encoder' %}" class="dropdown-item">
+                                    <i class="fas fa-lock"></i>
+                                    <span>Send Authorization</span>
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-compress-alt"></i>
+                                    <span>Shortener</span>
+                                </a>
+                            </div>
+                        </li>
                         <li>
                             <a href="#" class="nav-link">
                                 <div class="nav-icon">
