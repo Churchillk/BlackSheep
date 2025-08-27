@@ -1,7 +1,7 @@
 {% extends "Home/base.html" %}
 
-{% block title %}Decoder Tool{% endblock %}
-{% block page_title %}Decoder Tool{% endblock %}
+{% block title %}Encoder Tool{% endblock %}
+{% block page_title %}Encoder Tool{% endblock %}
 
 {% block body %}
 <div class="form-container">
@@ -10,22 +10,22 @@
             <div class="form-icon">
                 <i class="fas fa-code"></i>
             </div>
-            <h2>Enter Encoded Value</h2>
-            <p>Decode various encoding formats with BlackSheep</p>
+            <h2>Enter Raw Value</h2>
+            <p>Encode various formats with BlackSheep</p>
         </div>
         
         <form method="post" class="premium-form">
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="{{ form.encoded_value.id_for_label }}" class="form-label">
-                    <i class="fas fa-pencil-alt"></i> Encoded Value
+                <label for="{{ form.raw_value.id_for_label }}" class="form-label">
+                    <i class="fas fa-pencil-alt"></i> Raw Value
                 </label>
-                {{ form.encoded_value }}
-                {% if form.encoded_value.errors %}
+                {{ form.raw_value }}
+                {% if form.raw_value.errors %}
                 <div class="form-error">
                     <i class="fas fa-exclamation-circle"></i>
-                    {{ form.encoded_value.errors }}
+                    {{ form.raw_value.errors }}
                 </div>
                 {% endif %}
             </div>
@@ -47,19 +47,19 @@
             </div>
             
             <button type="submit" class="btn-primary btn-full-width">
-                <i class="fas fa-unlock"></i> Decode Value
+                <i class="fas fa-unlock"></i> Encode Value
             </button>
         </form>
-        
-        {% if decoded_value %}
+
+        {% if encoded_value %}
         <div class="result-container">
             <div class="result-header">
-                <h3>Decoded Result</h3>
+                <h3>Encoded Result</h3>
                 <span class="encoding-badge">{{ encoding_type }}</span>
             </div>
             <div class="result-content">
-                <pre>{{ decoded_value }}</pre>
-                <button class="btn-secondary btn-copy" data-clipboard-text="{{ decoded_value }}">
+                <pre>{{ encoded_value }}</pre>
+                <button class="btn-secondary btn-copy" data-clipboard-text="{{ encoded_value }}">
                     <i class="fas fa-copy"></i> Copy to Clipboard
                 </button>
             </div>

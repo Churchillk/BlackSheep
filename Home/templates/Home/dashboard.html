@@ -1,9 +1,402 @@
 {% extends "Home/base.html" %}
 {% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
 
 {% block body %}
-<div class="dashboard-container">
-    <h1>Welcome to your Dashboard</h1>
-    <p>Here you can manage your account settings, view analytics, and more.</p>
+<div class="dashboard-content">
+    <!-- Stats Cards Row -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-link"></i>
+            </div>
+            <div class="stat-info">
+                <h3>245</h3>
+                <p>URLs Processed</p>
+            </div>
+            <div class="stat-trend">
+                <i class="fas fa-arrow-up"></i>
+                <span>12.5%</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>198</h3>
+                <p>Successful Decodes</p>
+            </div>
+            <div class="stat-trend">
+                <i class="fas fa-arrow-up"></i>
+                <span>8.2%</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>32</h3>
+                    <p>Failed Attempts</p>
+                </div>
+                <div class="stat-trend down">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>3.1%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>15</h3>
+                    <p>Pending Operations</p>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>5.7%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>URL Processing Trends</h3>
+                <div class="chart-actions">
+                    <button class="chart-action-btn active">Daily</button>
+                    <button class="chart-action-btn">Weekly</button>
+                    <button class="chart-action-btn">Monthly</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="areaChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Encoding Type Distribution</h3>
+                <div class="chart-actions">
+                    <button class="chart-action-btn active">All Time</button>
+                    <button class="chart-action-btn">This Month</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Recent URL Operations</h3>
+            <div class="table-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search operations...">
+                </div>
+                <button class="btn-primary">
+                    <i class="fas fa-plus"></i> New Operation
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>URL</th>
+                        <th>Encoding Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12 Nov 2023</td>
+                        <td>https://example.com/encoded=SGVsbG8=</td>
+                        <td><span class="badge base64">Base64</span></td>
+                        <td><span class="status-badge success">Success</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn copy" title="Copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11 Nov 2023</td>
+                        <td>https://api.service.com/data=%7B%22name%22%3A%22John%22%7D</td>
+                        <td><span class="badge url">URL</span></td>
+                        <td><span class="status-badge success">Success</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn copy" title="Copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>10 Nov 2023</td>
+                        <td>48656c6c6f20576f726c64</td>
+                        <td><span class="badge hex">Hex</span></td>
+                        <td><span class="status-badge success">Success</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn copy" title="Copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>09 Nov 2023</td>
+                        <td>Hello%20World%21</td>
+                        <td><span class="badge url">URL</span></td>
+                        <td><span class="status-badge success">Success</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn copy" title="Copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>08 Nov 2023</td>
+                        <td>InvalidBase64String!!</td>
+                        <td><span class="badge base64">Base64</span></td>
+                        <td><span class="status-badge error">Failed</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn copy" title="Copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="action-btn delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-footer">
+            <div class="table-info">
+                Showing 1 to 5 of 48 entries
+            </div>
+            <div class="pagination">
+                <button class="pagination-btn disabled">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">4</button>
+                <button class="pagination-btn">5</button>
+                <button class="pagination-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock body %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Area Chart
+    const areaCtx = document.getElementById('areaChart').getContext('2d');
+    const areaChart = new Chart(areaCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'URLs Processed',
+                data: [18, 25, 30, 35, 40, 32, 28],
+                backgroundColor: 'rgba(103, 158, 254, 0.2)',
+                borderColor: 'rgba(103, 158, 254, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Successful Decodes',
+                data: [15, 22, 26, 30, 35, 28, 25],
+                backgroundColor: 'rgba(52, 199, 89, 0.2)',
+                borderColor: 'rgba(52, 199, 89, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#b0b0b5'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#b0b0b5'
+                    }
+                }
+            }
+        }
+    });
+
+    // Bar Chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Base64', 'URL', 'Hex', 'HTML'],
+            datasets: [{
+                label: 'Encoding Usage',
+                data: [125, 85, 45, 30],
+                backgroundColor: [
+                    'rgba(103, 158, 254, 0.8)',
+                    'rgba(77, 208, 225, 0.8)',
+                    'rgba(174, 136, 255, 0.8)',
+                    'rgba(255, 138, 101, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(103, 158, 254, 1)',
+                    'rgba(77, 208, 225, 1)',
+                    'rgba(174, 136, 255, 1)',
+                    'rgba(255, 138, 101, 1)'
+                ],
+                borderWidth: 1,
+                borderRadius: 6,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#b0b0b5'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#b0b0b5'
+                    }
+                }
+            }
+        }
+    });
+
+    // Chart period buttons
+    const chartButtons = document.querySelectorAll('.chart-action-btn');
+    chartButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            chartButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            // Here you would typically reload chart data based on selection
+        });
+    });
+
+    // Action buttons functionality
+    const actionButtons = document.querySelectorAll('.action-btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.classList.contains('view') ? 'view' : 
+                          this.classList.contains('copy') ? 'copy' : 'delete';
+            
+            // Add your action handling logic here
+            console.log(`${action} action triggered`);
+        });
+    });
+
+    // Copy button functionality
+    const copyButtons = document.querySelectorAll('.action-btn.copy');
+    copyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i>';
+            this.style.color = '#34c759';
+            
+            setTimeout(() => {
+                this.innerHTML = originalHTML;
+                this.style.color = '';
+            }, 2000);
+        });
+    });
+});
+</script>
+{% endblock %}

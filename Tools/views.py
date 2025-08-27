@@ -1,9 +1,11 @@
 from django.shortcuts import render
 import base64, binascii, urllib.parse, html
 from django.views.generic import FormView
-from .forms import EncodedInputForm
+from .forms import EncodedInputForm, EncodeForm
 from django.utils.html import escape
 
+
+# decoding encoded data
 class DecodeInput(FormView):
     form_class = EncodedInputForm
     template_name = "URLS/decoding_forms.html"
@@ -110,5 +112,72 @@ class DecodeInput(FormView):
             if decoded != encoded_value:
                 return decoded
             return None
+        except Exception:
+            return None
+        
+        
+# encoding raw data
+class EncodeInput(FormView):
+    template_name = 'URLS/encode.html'
+    form_class = EncodeForm
+
+    def form_valid(self, form):
+        # Get the input value from the form
+        raw_value = form.cleaned_data['raw_value']
+        encoding_type = form.cleaned_data['encoding_type']
+
+        # Encode the raw value
+        encoded_value = self.encode_with_type(raw_value, encoding_type)
+
+        # Add context with results
+        context = self.get_context_data(
+            form=form,
+            encoded_value=encoded_value,
+            encoding_type=encoding_type
+        )
+        return self.render_to_response(context)
+
+    def encode_with_type(self, raw_value, encoding_type):
+        """Encode with a specific encoding type"""
+        if encoding_type == 'base64':
+            return self.try_base64_encode(raw_value)
+        elif encoding_type == 'hex':
+            return self.try_hex_encode(raw_value)
+        elif encoding_type == 'url':
+            return self.try_url_encode(raw_value)
+        elif encoding_type == 'html':
+            return self.try_html_encode(raw_value)
+        else:
+            return "Unsupported encoding type selected"
+
+    def try_base64_encode(self, raw_value):
+        """Try Base64 encoding"""
+        try:
+            encoded_bytes = base64.b64encode(raw_value.encode('utf-8'))
+            return encoded_bytes.decode('utf-8')
+        except Exception:
+            return None
+
+    def try_hex_encode(self, raw_value):
+        """Try Hex encoding"""
+        try:
+            encoded_bytes = raw_value.encode('utf-8').hex()
+            return encoded_bytes
+        except Exception:
+            return None
+
+    def try_url_encode(self, raw_value):
+        """Try URL encoding"""
+        try:
+            encoded = urllib.parse.quote(raw_value)
+            return encoded
+        except Exception:
+            return None
+
+    def try_html_encode(self, raw_value):
+        """Try HTML entities encoding"""
+        try:
+            encoded = html.escape(raw_value)
+            return encoded
         except Exception:
             return None
