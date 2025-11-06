@@ -1,0 +1,5 @@
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+<!-- makes php treat all images as php. eg png, jpg, jpeg -->
