@@ -1,0 +1,205 @@
+{% extends "Home/base.html" %}
+
+{% block title %}XXE Scan Details{% endblock %}
+{% block page_title %}XXE Scan Details{% endblock %}
+
+{% block body %}
+<div class="dashboard-content">
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Scan Details</h2>
+                <p>Detailed information about the XXE vulnerability scan</p>
+            </div>
+
+            <div class="scan-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Target URL:</strong>
+                        <span>{{ scan.target_url }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Endpoint:</strong>
+                        <span>{{ scan.endpoint }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Method:</strong>
+                        <span>{{ scan.method }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>File to Read:</strong>
+                        <span>{{ scan.file_to_read }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Status:</strong>
+                        <span class="status-badge {% if scan.status == 'completed' %}success{% else %}error{% endif %}">
+                            {{ scan.status|title }}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Scan Date:</strong>
+                        <span>{{ scan.created_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Scan Results</h2>
+                <p>Results from all tested payloads</p>
+            </div>
+
+            <div class="results-list">
+                {% for result in results %}
+                <div class="result-item {% if result.success %}success{% else %}error{% endif %}">
+                    <div class="result-header">
+                        <h4>Payload {{ forloop.counter }}</h4>
+                        <span class="result-status">
+                            {% if result.success %}
+                            <i class="fas fa-check-circle success"></i> VULNERABLE
+                            {% else %}
+                            <i class="fas fa-times-circle error"></i> NOT VULNERABLE
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <strong>Status Code:</strong> {{ result.status_code }}
+                        </div>
+                        {% if result.error_message %}
+                        <div class="detail-row">
+                            <strong>Error:</strong> {{ result.error_message }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="payload-section">
+                        <h5>XML Payload:</h5>
+                        <pre class="payload-code">{{ result.payload_used }}</pre>
+                    </div>
+
+                    {% if result.success %}
+                    <div class="response-section">
+                        <h5>Response:</h5>
+                        <pre class="response-code">{{ result.response_body }}</pre>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.scan-info {
+    padding: 20px 0;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-item strong {
+    color: var(--accent-primary);
+}
+
+.results-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.result-item {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+}
+
+.result-item.success {
+    border-left-color: var(--success);
+    background: rgba(52, 199, 89, 0.1);
+}
+
+.result-item.error {
+    border-left-color: var(--danger);
+    background: rgba(255, 59, 48, 0.1);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.result-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.result-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.result-status .success {
+    color: var(--success);
+}
+
+.result-status .error {
+    color: var(--danger);
+}
+
+.detail-row {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.detail-row strong {
+    color: var(--accent-primary);
+}
+
+.payload-section, .response-section {
+    margin-top: 15px;
+}
+
+.payload-section h5, .response-section h5 {
+    margin: 0 0 10px 0;
+    color: var(--accent-primary);
+    font-size: 14px;
+}
+
+.payload-code, .response-code {
+    background: var(--bg-primary);
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.response-code {
+    max-height: 300px;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}

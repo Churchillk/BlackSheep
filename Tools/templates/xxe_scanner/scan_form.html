@@ -1,0 +1,301 @@
+{% extends "Home/base.html" %}
+
+{% load custom_filters %}
+
+{% block title %}XXE Vulnerability Scanner{% endblock %}
+{% block page_title %}XXE Vulnerability Scanner{% endblock %}
+
+{% block body %}
+<div class="request-maker-container">
+    <div class="request-layout">
+        <div class="request-form-container">
+            <div class="form-card">
+                <div class="form-header">
+                    <div class="form-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h2>XXE Vulnerability Scanner</h2>
+                    <p>Test for XML External Entity injection vulnerabilities</p>
+                </div>
+
+                <form method="post" class="premium-form" id="xxeForm">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="target_url" class="form-label">
+                            <i class="fas fa-link"></i> Target URL
+                        </label>
+                        <input type="url" id="target_url" name="target_url" class="form-control"
+                               placeholder="https://example.com" required
+                               value="{{ form.target_url.value|default:'' }}">
+                        {% if form.target_url.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.target_url.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="endpoint" class="form-label">
+                                <i class="fas fa-code-branch"></i> Endpoint
+                            </label>
+                            <input type="text" id="endpoint" name="endpoint" class="form-control"
+                                   placeholder="/data" value="{{ form.endpoint.value|default:'/data' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="method" class="form-label">
+                                <i class="fas fa-code"></i> HTTP Method
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="method" name="method" class="form-select">
+                                    <option value="POST" {% if form.method.value == "POST" %}selected{% endif %}>POST</option>
+                                    <option value="GET" {% if form.method.value == "GET" %}selected{% endif %}>GET</option>
+                                </select>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="file_to_read" class="form-label">
+                                <i class="fas fa-file"></i> File to Read
+                            </label>
+                            <input type="text" id="file_to_read" name="file_to_read" class="form-control"
+                                   placeholder="/etc/passwd" value="{{ form.file_to_read.value|default:'/etc/passwd' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="timeout" class="form-label">
+                                <i class="fas fa-clock"></i> Timeout (seconds)
+                            </label>
+                            <input type="number" id="timeout" name="timeout" class="form-control"
+                                   min="1" max="60" value="{{ form.timeout.value|default:'10' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="header_choice" class="form-label">
+                            <i class="fas fa-header"></i> Header Configuration
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="header_choice" name="header_choice" class="form-select">
+                                <option value="default" {% if form.header_choice.value == "default" %}selected{% endif %}>Default Headers</option>
+                                <option value="custom" {% if form.header_choice.value == "custom" %}selected{% endif %}>Custom Headers</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="custom-headers-group"
+                         style="{% if form.header_choice.value != 'custom' %}display: none;{% endif %}">
+                        <label for="custom_headers" class="form-label">
+                            <i class="fas fa-edit"></i> Custom Headers (JSON)
+                        </label>
+                        <textarea id="custom_headers" name="custom_headers" class="form-control" rows="4"
+                                  placeholder='{"Content-Type": "application/xml", "User-Agent": "Mozilla/5.0..."}'>{{ form.custom_headers.value|default:'{"Content-Type": "application/xml"}' }}</textarea>
+                        {% if form.custom_headers.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.custom_headers.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-shield-alt"></i> Scan for XXE
+                        </button>
+                        <button type="button" id="reset-form" class="btn-secondary">
+                            <i class="fas fa-redo"></i> Reset Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="response-container {% if not scan_results and not error %}empty{% endif %}">
+            {% if scan_results or error %}
+                {% if scan_results %}
+                <div class="response-card">
+                    <div class="response-header">
+                        <h3>Scan Results</h3>
+                        <div class="response-status">
+                            <span class="status-badge {% if success %}status-2xx{% else %}status-4xx{% endif %}">
+                                {% if success %}VULNERABLE{% else %}NOT VULNERABLE{% endif %}
+                            </span>
+                            <span class="response-time">{{ scan_results|length }} payloads tested</span>
+                        </div>
+                    </div>
+
+                    <div class="response-tabs">
+                        <button class="tab-button active" data-tab="summary">Summary</button>
+                        <button class="tab-button" data-tab="payloads">Payloads</button>
+                        <button class="tab-button" data-tab="details">Details</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div id="tab-summary" class="tab-pane active">
+                            <div class="scan-summary">
+                                {% for result in scan_results %}
+                                    {% if result.success %}
+                                    <div class="success-result">
+                                        <div class="result-header">
+                                            <i class="fas fa-check-circle success"></i>
+                                            <h4>XXE Vulnerability Found!</h4>
+                                        </div>
+                                        <div class="result-content">
+                                            <div class="result-item">
+                                                <strong>File Read:</strong> {{ scan.file_to_read }}
+                                            </div>
+                                            <div class="result-item">
+                                                <strong>Status Code:</strong> {{ result.status_code }}
+                                            </div>
+                                            <div class="result-item">
+                                                <strong>Response Preview:</strong>
+                                                <pre class="response-preview">{{ result.response_body|truncatewords:50 }}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if not success %}
+                                <div class="error-result">
+                                    <div class="result-header">
+                                        <i class="fas fa-times-circle danger"></i>
+                                        <h4>No XXE Vulnerability Detected</h4>
+                                    </div>
+                                    <div class="result-content">
+                                        <p>The target appears to be safe against XXE attacks with the tested payloads.</p>
+                                        <div class="test-stats">
+                                            <div class="stat">
+                                                <strong>Payloads Tested:</strong> {{ scan_results|length }}
+                                            </div>
+                                            <div class="stat">
+                                                <strong>Successful:</strong> 0
+                                            </div>
+                                            <div class="stat">
+                                                <strong>Failed:</strong> {{ scan_results|length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div id="tab-payloads" class="tab-pane">
+                            <div class="payloads-list">
+                                {% for result in scan_results %}
+                                <div class="payload-item {% if result.success %}success{% else %}error{% endif %}">
+                                    <div class="payload-header">
+                                        <span class="payload-status">
+                                            {% if result.success %}
+                                            <i class="fas fa-check success"></i> SUCCESS
+                                            {% else %}
+                                            <i class="fas fa-times error"></i> FAILED
+                                            {% endif %}
+                                        </span>
+                                        <span class="payload-number">Payload {{ forloop.counter }}</span>
+                                    </div>
+                                    <div class="payload-content">
+                                        <div class="payload-details">
+                                            <strong>Status Code:</strong> {{ result.status_code }}
+                                            {% if result.error_message %}
+                                            <br><strong>Error:</strong> {{ result.error_message }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="payload-xml">
+                                            <pre><code>{{ result.payload_used }}</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div id="tab-details" class="tab-pane">
+                            <div class="scan-details">
+                                <h4>Scan Information</h4>
+                                <div class="details-grid">
+                                    <div class="detail-item">
+                                        <strong>Target URL:</strong> {{ scan.target_url }}
+                                    </div>
+                                    <div class="detail-item">
+                                        <strong>Endpoint:</strong> {{ scan.endpoint }}
+                                    </div>
+                                    <div class="detail-item">
+                                        <strong>Method:</strong> {{ scan.method }}
+                                    </div>
+                                    <div class="detail-item">
+                                        <strong>File to Read:</strong> {{ scan.file_to_read }}
+                                    </div>
+                                    <div class="detail-item">
+                                        <strong>Timeout:</strong> {{ scan.timeout }} seconds
+                                    </div>
+                                    <div class="detail-item">
+                                        <strong>Scan Date:</strong> {{ scan.created_at|date:"M d, Y H:i" }}
+                                    </div>
+                                </div>
+
+                                <h4>Response Details</h4>
+                                {% for result in scan_results %}
+                                    {% if result.success or forloop.first %}
+                                    <div class="response-detail">
+                                        <h5>Payload {{ forloop.counter }} {% if result.success %}(Successful){% endif %}</h5>
+                                        <div class="response-full">
+                                            <pre>{{ result.response_body }}</pre>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="response-actions">
+                        <button class="btn-secondary btn-copy" data-clipboard-target=".response-full pre">
+                            <i class="fas fa-copy"></i> Copy Response
+                        </button>
+                        <a href="{% url 'scan' %}" class="btn-secondary">
+                            <i class="fas fa-redo"></i> New Scan
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="error-card">
+                    <div class="error-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Scan Failed</h3>
+                    </div>
+                    <div class="error-message">
+                        <p>{{ error }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-response">
+                    <i class="fas fa-search"></i>
+                    <h3>Run an XXE Scan</h3>
+                    <p>Configure your target and click "Scan for XXE" to test for vulnerabilities</p>
+                    <div class="scan-tips">
+                        <h4>Common XXE Targets:</h4>
+                        <ul>
+                            <li>XML processing endpoints</li>
+                            <li>SOAP web services</li>
+                            <li>File upload features</li>
+                            <li>API endpoints accepting XML</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

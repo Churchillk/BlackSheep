@@ -1,0 +1,38 @@
+Starting XXE scan for http://saturn.picoctf.net:51731/data
+Trying payload 1/5
+Payload 1 - Status: 200, Success: True
+SUCCESS: File /etc/passwd was read successfully!
+Starting XXE scan for http://saturn.picoctf.net:51731/data
+Trying payload 1/7
+Payload 1 - Status: 200, Success: True
+SUCCESS: File /etc/passwd was read successfully!
+Trying payload 2/7
+Payload 2 - Status: 200, Success: True
+SUCCESS: File /etc/passwd was read successfully!
+Trying payload 3/7
+Payload 3 - Status: 500, Success: False
+Trying payload 4/7
+Payload 4 - Status: 200, Success: False
+Trying payload 5/7
+Payload 5 - Status: 200, Success: False
+Trying payload 6/7
+Payload 6 - Status: 500, Success: False
+Trying payload 7/7
+Payload 7 - Status: 500, Success: False
+Starting XXE scan for http://saturn.picoctf.net:51731/data
+Trying payload 1/7
+Payload 1 - Status: 200, Success: True
+SUCCESS: File /etc/passwd was read successfully!
+Trying payload 2/7
+Payload 2 - Status: 200, Success: True
+SUCCESS: File /etc/passwd was read successfully!
+Trying payload 3/7
+Payload 3 - Status: 500, Success: False
+Trying payload 4/7
+Payload 4 - Status: 200, Success: False
+Trying payload 5/7
+Payload 5 - Status: 200, Success: False
+Trying payload 6/7
+Payload 6 - Status: 500, Success: False
+Trying payload 7/7
+Payload 7 - Status: 500, Success: False
